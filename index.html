@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<meta charset="utf-8">
+	<title>iMuTV.2</title>
+
+	<link rel="stylesheet" href="style.css?v=2131">
+
+	<meta content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;' name='viewport' />
+	<meta name="viewport" content="width=device-width" />
+	<script type="text/javascript" src="cordova-1.8.0.js"></script>
+	<script type="text/javascript" src="scripts/jquery-1.7.min.js"></script>
+	<script type="text/javascript" src="jQuery.jQTubeUtil.js"></script>
+
+	<script type="text/javascript" src="scripts/lawnchair-0.6.1.min.js"></script>
+	
+	<!--Depends up here-->
+	<script type="text/javascript" src="marmalade.js"></script>
+	<script type="text/javascript" src="scripts/lawnchair.dom.js"></script>
+	<script type="text/javascript" src="scripts/lawnchair.callbacks.js"></script>
+
+	<script type="text/javascript" src="jam.js"></script>
+	<script type="text/javascript" src="martwork.js"></script>
+	<script type="text/javascript" src="lartwork.js"></script>
+	<script type="text/javascript" src="rohart.js"></script>
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+
+</head>
+<body>
+
+	<div id="app">
+
+		<div id="susic_artist_portal"></div>
+
+		<div id="toolbar">
+
+			<div id="toolbar-left">
+				<div id="window-controls">
+					<div class="window-control window-close"><i class="icon-remove"></i></div>
+					<div class="window-control window-minimize"><i class="icon-minus"></i></div>
+					<div class="window-control window-maximize"><i class="icon-plus"></i></div>
+				</div>
+				<div id="toolbar-left-edge">
+					<img class="profilepic" src="images/profilepic.jpg" alt="" height="32" width="32">
+					<i id="toolbar-settings" class="icon-cog btnSettings"></i>
+				</div>
+			</div>
+
+			<div id="toolbar-right">
+
+				<div id="toolbar-search">
+					<div id="toolbar-searchbtn" class="grnBtn"><i class="icon-search"></i></div>
+					<div id="toolbar-searchback">
+						<input id="toolbar-searchinput" type="text" />
+					</div>
+
+					<p id="toolbar-search-type">artist&nbsp;<i class="icon-chevron-down"></i></p>
+
+					<ul id="toolbar-search-types">
+
+					</ul>
+
+				</div>
+				<div id="toolbar-logo">
+					
+					<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+						 width="168px" height="53.839px" viewBox="5 0 368 73.839" enable-background="new 5 0 368 73.839" xml:space="preserve">
+					<rect x="80.667" y="10.839" fill="none" width="199" height="63"/>
+					<text transform="matrix(1 0 0 1 80.6665 64.7979)" font-family="'MyriadPro-Regular'" font-size="64">i</text>
+					<text transform="matrix(1 0 0 1 95.6426 64.7979)" font-family="'MyriadPro-Regular'" font-size="76">MuTV</text>
+					<rect x="283.667" y="9.089" fill="none" width="137.289" height="67.578"/>
+					<text transform="matrix(1 0 0 1 283.667 24.4971)" font-family="'OpenSans-Light'" font-size="20.2732">social</text>
+					<text transform="matrix(1 0 0 1 283.667 44.5566)" font-family="'OpenSans-Light'" font-size="20.2732">music</text>
+					<text transform="matrix(1 0 0 1 283.667 64.6162)" font-family="'OpenSans-Light'" font-size="20.2732">discovery</text>
+					<rect x="10" y="4.256" width="65.667" height="65.667"/>
+					<rect x="13.666" y="7.922" fill="#FFFFFF" width="58.336" height="58.336"/>
+					<path fill="#010101" d="M35.382,25.059v19.636c-1.069-0.224-2.313-0.14-3.547,0.317c-2.775,1.031-3.755,3.541-3.018,5.602
+						c0.734,2.063,2.907,2.898,5.682,1.866c2.356-0.875,3.9-2.814,3.86-4.644c0,0,0-10.412,0-16.22l11.749-2.692v12.459
+						c-1.068-0.223-2.313-0.139-3.547,0.317c-2.777,1.031-3.757,3.542-3.02,5.603c0.735,2.063,2.906,2.897,5.684,1.866
+						c2.357-0.875,3.897-2.814,3.861-4.644V21.256L35.382,25.059z"/>
+					</svg>
+
+					
+				</div>
+
+			</div>
+			
+		</div>
+
+		<div id="main">
+			<div id="sidebar-left">
+
+				<ul class="categorylist">
+
+					<li class="category-header"> <i class="icon-chevron-down"></i> <span>Browse</span></li>
+					<li class="category"> <i class="icon-home"></i> <span>Home</span></li>
+					<li class="category current"> <i class="icon-tasks"></i> <span>Charts</span></li>
+					<li class="category"> <i class="icon-calendar"></i> <span>New Releases</span></li>
+
+				</ul>
+
+				<ul class="categorylist">
+
+					<li class="category-header"> <i class="icon-chevron-down"></i> <span>Your Music</span></li>
+					<li class="category"> <i class="icon-music"></i> <span>Library</span></li>
+					<li class="category"> <i class="icon-time"></i> <span>History</span></li>
+					<li class="category"> <i class="icon-list"></i> <span>Queue</span></li>
+
+				</ul>
+
+				<div id="currentPlaying">
+					
+					<div id="currentPlaying-art">
+						<video id="marm" autoplay="autoplay" src="" width="100%" height="100%"></video>
+						<img class="albumart" src="images/WarStories.jpg" width="165" height="165" alt="" />
+					</div>
+
+					<div id="currentPlaying-Info">
+						<h2>{TITLE}</h3>
+						<h3>{ARTIST}</h3>
+					</div>
+				</div>
+				
+
+			</div>
+			<div id="main-content" class="">
+
+				<!--
+				<div class="big-background-container">
+				<img src="http://static.bbci.co.uk/music/images/artists/542x305/82a8aee6-0772-4399-9238-b5903eab413f.jpg" width="100%" />
+				<div class="big-background-fade"></div>
+				</div>
+				-->
+
+				<div class="content not-active" data-pane="launch">
+					
+					<h1 class="mainTitle">PANES</h1>
+					
+					
+				</div>
+				
+				<div class="content active-pane" data-pane="demo">
+					
+					<h1 class="mainTitle"><i class="icon-wrench"></i> <span>Loading...</span></h1>	
+
+					<div class="list">
+
+						<div class="list-group">
+
+							<table class="list-group-a">
+								<tr>
+									<td class="ga">
+										<div class="album">
+											<div class="albumart-interface">
+												<img class="albumart" src="images/cover.jpg" width="165" height="165" alt="" />
+												<div class="albumart-overlay">
+												<ul class="album-options">
+												<li><a class="album-addtol" href=""><i class="icon-ok-sign"></i></a></li>
+												<li><a class="album-addtoq" href=""><i class="icon-plus-sign"></i></a></li>
+												</ul>
+												<a class="album-play" href=""><i class="icon-play-circle"></i></a>
+											</div>
+											</div>
+											<h1><a class="album-title" href="#">Random Album Title</a></h1>
+											<h2><a class="album-artist" href="#">Deadmau5</a></h2>
+											<p class="album-trackcount">14 tracks</p>
+										</div>
+									</td>
+									<td class="gt">
+										<div class="group-tracks">
+											<table class="group-tracks-tracks">
+												<tr class="track">
+													<td class="track-no"><a class="track-link" href="#s"></a>12</td>
+													<td class="track-title">Sometimes things get whatever</td>
+													<td class="track-artist">Deadmau5</td>
+													<td class="track-duration">3:12</td>
+													<td class="track-options"><a href="#"><i class="icon-share"></i></a><a href="#"><i class="icon-ok"></i></a><a href="#"><i class="icon-plus-sign"></i></a></td>
+												</tr>
+											</table>
+										</div>
+									</td>
+								</tr>
+							</table>
+
+						</div>
+
+
+					</div>
+
+				</div>
+
+
+			</div>
+			
+		</div>
+
+		<div id="bottombar">
+			<div id="bottombar-left">
+				<a class="subopt leftopt" href=""><i class="icon-plus-sign"></i></a>
+
+				<a class="mainopt" href=""><i class="icon-step-backward"></i></a>
+				<a id="playbutton" class="mainopt middleopt" href=""><i class="icon-play"></i></a>
+				<a class="mainopt" href=""><i class="icon-step-forward"></i></a>
+
+				<a class="subopt rightopt" href=""><i class="icon-ok-sign"></i></a>
+			</div>
+
+			<div id="bottombar-right">
+
+				<div id="bottombar-tracker">
+					<p class="timecurrent">1:36</p>
+					<div id="bottombar-tracker-bar">
+						<div id="bottombar-tracker-progess"></div>
+					</div>
+					<p class="timeend">3:25</p>
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+
+	<div id="templates">
+
+			<div id="grid_templates">
+
+				<div class="artist">
+					<a class="artist-mbid-link" href=""><img class="artist-image" src="http://static.bbci.co.uk/music/images/artists/542x305/e21857d5-3256-4547-afb3-4b6ded592596.jpg" width="293" height="165" alt="" /></a>
+					<h1><a class="artist-name artist-mbid-link" href="#">Gorillaz</a></h1>
+					<h2><a class="artist-country artist-mbid-link" href="#">UK</a></h2>
+					<p class="artist-disambiguation"></p>
+				</div>
+
+				<div class="album">
+					<div class="albumart-interface">
+						<img class="albumart" src="images/cover.jpg" width="165" height="165" alt="" />
+						<div class="albumart-overlay">
+							<ul class="album-options">
+								<li><a class="album-addtol" href=""><i class="icon-ok-sign"></i></a></li>
+								<li><a class="album-addtoq" href=""><i class="icon-plus-sign"></i></a></li>
+							</ul>
+							<a class="album-play" href=""><i class="icon-play-circle"></i></a>
+						</div>
+					</div>
+					<h1><a class="album-title" href="#">Free</a></h1>
+					<h2><a class="album-artist" href="#">Twin Atlantic</a></h2>
+					<p class="album-trackcount">14 tracks</p>
+				</div>
+
+			</div>
+
+			<div id="list_templates">
+
+				<div class="list-group grouped-album">
+					<table class="list-group-a">
+						<tr>
+							<td class="ga">
+								<div class="album">
+									<div class="albumart-interface">
+										<img class="albumart" src="images/cover.jpg" width="165" height="165" alt="" />
+										<div class="albumart-overlay">
+										<ul class="album-options">
+										<li><a class="album-addtol" href=""><i class="icon-ok-sign"></i></a></li>
+										<li><a class="album-addtoq" href=""><i class="icon-plus-sign"></i></a></li>
+										</ul>
+										<a class="album-play" href=""><i class="icon-play-circle"></i></a>
+									</div>
+									</div>
+									<h1><a class="album-title" href="#">Random Album Title</a></h1>
+									<h2><a class="album-artist" href="#">Deadmau5</a></h2>
+									<p class="album-year">2012</p>
+								</div>
+							</td>
+							<td class="gt">
+								<div class="group-tracks">
+									<table class="group-tracks-tracks">
+										<tr class="track">
+											<td class="track-no"><a class="track-link" href="#s"></a><span>12</span></td>
+											<td class="track-title">Sometimes things get whatever</td>
+											<td class="track-artist">Deadmau5</td>
+											<td class="track-duration">3:12</td>
+											<td class="track-options"><a href="#"><i class="icon-share"></i></a><a href="#"><i class="icon-ok"></i></a><a href="#"><i class="icon-plus-sign"></i></a></td>
+										</tr>
+									</table>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+
+			</div>
+
+	</div>
+
+	<script type="text/javascript" src="imutv.js"></script>
+</body>
+</html>

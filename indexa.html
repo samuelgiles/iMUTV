@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<meta charset="utf-8">
+	<title>iMuTV.2</title>
+
+	<link rel="stylesheet" href="imutv.css?v=2131">
+
+	<meta content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;' name='viewport' />
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700,300' rel='stylesheet' type='text/css'>
+	<meta name="viewport" content="width=device-width" />
+	<script type="text/javascript" src="cordova-1.8.0.js"></script>
+	<script type="text/javascript" src="scripts/jquery-1.7.min.js"></script>
+	<script type="text/javascript" src="jQuery.jQTubeUtil.js"></script>
+	<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/hmac-sha512.js"></script>
+	<script type="text/javascript" src="scripts/lawnchair-0.6.1.min.js"></script>
+	
+	<!--Depends up here-->
+	<script type="text/javascript" src="marmalade.js"></script>
+	<script type="text/javascript" src="scripts/lawnchair.dom.js"></script>
+	<script type="text/javascript" src="scripts/lawnchair.callbacks.js"></script>
+
+	<script type="text/javascript" src="jam.js"></script>
+	<script type="text/javascript" src="martwork.js"></script>
+	<script type="text/javascript" src="lartwork.js"></script>
+	<script type="text/javascript" src="rohart.js"></script>
+
+	<script type="text/javascript">
+
+		//IMUTV-DATA-AND-LOGIN-SYSTEM
+		function IDaLS(){
+
+			var self = this;
+
+			//Generate token using username and password, on the server use the token to encrypt a token generated using the users user-agent + username + password which will then
+			//be used for authenicating the user.
+
+			//Attach the token to every request to the server, match up on the server = Javascript based session.
+
+			//Store the token in LocalStorage
+
+			//The client will send the token with every request, the server will generate 
+
+			self.Server = "http://idals.imutv"
+			//Empty object, can put objects inside it and then these can be synced with the server
+			//The store is stored in memory locally, any changes are to be made using the 
+			self.Store = {}
+
+			self.Token = "";
+			self.SToken = "";
+
+			//					 -> Artist
+			//Library -> Albums =
+			//					 -> Songs
+
+			self.ModifyStore = function(fFunction){
+				fFunction();
+				self.StoreHasChanged();
+			}
+			self.StoreHasChanged = function(){
+
+				//For now we are just syncing the whole store to the server, in the future it could be possible
+				//to compare the current object to the old object and extract the difference which
+				//could then be synced to the server, reducing the amount of data throughput.
+
+				//Load JSON respresentation of the store:
+				var sJSONStore = JSON.stringify(self.Store);
+
+				self.MakeRequest({"action": "sync", "store": sJSONStore}, function(data){
+					console.log(data);
+				});
+				
+
+			}
+			//self.MakeRequest(oData, fCallback): Pass in data and a callback, its basically a wrapper to send the HTTP Headers in one line like so:
+			//self.MakeRequest({"action": "login", "username": "livelikeasam", "password": "password"},function(data){ console.log(data) });
+			self.MakeRequest = function(oData, fCallback){
+
+				$.ajax({
+					url: self.Server,
+					data: oData,
+					beforeSend: function(xhr) {
+						xhr.setRequestHeader("iMUTV_UserToken", self.Token);
+						xhr.setRequestHeader("IMUTV", "IMUTV");
+					},
+					success: function(data) {
+						data = $.parseJSON(data);
+						fCallback(data);
+					}
+				});
+
+			}
+
+			self.Download = function(){
+
+				self.MakeRequest({"action": "download"},function(data){
+
+					//Merge the latest data into the current data store
+					$.extend(true, self.Store, data.response.data);
+
+				});
+
+			}
+
+			//self.CheckTest: Internal function used to just check that the server is working and the user is logged in
+			self.CheckTest = function(){
+
+				$.ajax({
+					url: self.Server,
+					data: {"action": "test"},
+					beforeSend: function(xhr) {
+						xhr.setRequestHeader("iMUTV_UserToken", self.Token);
+						xhr.setRequestHeader("IMUTV", "IMUTV");
+					},
+					success: function(data) {
+						data = $.parseJSON(data);
+						console.log(data);
+					}
+				});
+
+			}
+			//self.Login(sUsername, sPassword, fCallback): Generates a token from the useragent, username, password and current time to uniquely identify this client on this computer, stores this in the token object, makes the request and sends the data back
+			self.Login = function(sUsername, sPassword, fCallback){
+				
+				self.Token = "" + CryptoJS.HmacSHA512("iMUTV-UserToken", navigator.userAgent + " | " + sUsername + " # " + sPassword + (new Date).getTime());
+				var data = {"action": "login", "username": sUsername, "password": sPassword}
+				self.MakeRequest(data, function(data){fCallback(data)});
+
+			}
+			//self.Logout(fCallback): Removes the user token, clears the store
+			self.Logout = function(fCallback){
+				self.Token = "";
+				self.Store = {}
+			}
+
+		}
+
+		function imutv_common(){
+
+			var self = this;
+
+			self.CurrentPane = function(){
+				return $(".pane.active");
+			}
+
+			self.ChangePane = function(sPaneID, data){
+
+				$(".pane.active").removeClass("active");
+				$("#pane-container").attr("data-active-pane", sPaneID);
+				$(".pane[data-pane=\"" + sPaneID + "\"]").addClass("active");
+
+				if(typeof(self.Panes[sPaneID]) == "function"){
+
+					self.Panes[sPaneID](data);
+
+				}
+
+			}
+
+			self.Panes = {
+				"home": function(data){
+
+					//Display an array of the current libraries albums
+					if(data.mode == "albums"){
+
+						self.RenderAlbums(iMUTVData.Store.Library, $(".pane-content", self.CurrentPane));
+
+					}
+					else if(data.mode == "artists"){
+
+						//Get the artists from the Library, combine artists
+
+						var aArtists = new Array();
+
+						iMUTVData.Store.Library.forEach(function(oArtist){
+
+							//Name, YearFormed, ArtistID
+
+							if(aArtists[oArtist.ArtistID] == undefined){
+								aArtists[oArtist.ArtistID] = {"Name": oArtist.Name, "YearFormed": oArtist.YearFormed, "ArtistID": oArtist.ArtistID};
+							}
+
+						});
+
+						console.log(aArtists);
+
+						self.RenderArtists()
+
+					}	
+
+				}
+			}
+
+			self.RenderAlbums= function(aAlbums, oContainer){
+
+				aAlbums.forEach(function(oAlbum){
+
+					var oAlbumDOM = $("<div class=\"album\"></div>")
+
+					$(oAlbumDOM).append($("<img src=\"images/WarStories.jpg\"></img>"));
+					$(oAlbumDOM).append($("<p class=\"name\">" + oAlbum.Album + "</p>"));
+					$(oAlbumDOM).append($("<p class=\"artist\">" + oAlbum.Name + "</p>"));
+
+					$(oContainer).append($(oAlbumDOM));
+
+				});
+
+			}
+
+		}
+
+		var iMUTVData = new IDaLS();
+		var iMUTV = new imutv_common();
+
+	</script>	
+	
+	<script type="text/javascript">
+
+		function imutv_error(oOptions){
+
+			var self = this;
+
+		}
+
+		function imutv_login(oForm){
+			var self = this;
+			
+			self.form = $(oForm);
+
+			self.username = function(){
+				return $("[name='login[username]']", self.form).val();
+			}
+			self.password = function(){
+				return $("[name='login[password]']", self.form).val();
+			}
+
+			self.init = function(){
+				
+				$(self.form).submit(function(){
+
+					iMUTVData.Login(self.username(), self.password(), function(data){
+
+						if(data.response.status == "success"){
+							
+							iMUTV.ChangePane("home");
+
+						}
+						else{
+							console.log("Error")
+							$(".error", self.form).remove();
+							$(".input:first", self.form).before($("<div class=\"error\">Login failed! Please check your username and password.</div>"))
+						}
+
+						return false;
+					});
+
+
+					return false;
+				});
+
+			}
+
+			self.init();
+		}
+
+		$(document).ready(function(){
+
+			$(window).resize(function(){
+
+				var iNowPlayingHeight = $("#left-bar-bottom").height();
+				var iHeaderHeight = $("header").height();
+				var iWindowHeight = $(window).height();
+
+				$("#left-bar,#middle").css({"height": (iWindowHeight-iHeaderHeight) + "px"});
+				$("#left-top").css({"height": ((iWindowHeight-iHeaderHeight)-iNowPlayingHeight) + "px"});
+				$("#pane-container").css({"height": ((iWindowHeight-iHeaderHeight)-$("#pane-toolbar-bottom").height())});
+
+			
+
+
+			});
+			imutv_login($(".login"));
+			iMUTV.ChangePane("login");
+
+
+		});
+
+	</script>
+	
+
+</head>
+<body>
+
+	<div id="app">
+		<header>
+			<div id="header-top">
+				<div id="header-controls">
+						
+					<div class="volume">
+						
+						<div class="volume-container">
+							<a href="#" class="volume-down "><i class="icon-volume-down"></i></a>
+							<div class="volumebar">
+								
+								<div class="volumebar-current" style="width:50%"></div>
+								
+							</div>
+							<a href="#" class="volume-up"><i class="icon-volume-up"></i></a>
+						</div>
+					</div>
+					
+					<div id="playback-modes">
+						<a href="" class="toggle"><i class="ic-shuffle"></i></a>
+						<a href="" class="toggle toggle-on"><i class="ic-retweet"></i></a>
+					</div>
+				</div>
+				<div id="top-bar">
+						
+					<a href="#" id="top-bar-back"><i class="ic-previous"></i></a>
+					<a href="#" id="top-bar-play"><i class="ic-pause"></i></a>
+					<a href="#" id="top-bar-forward"><i class="ic-next"></i></a>
+					
+				</div>
+				<form action="">
+					<div class="inner-search">
+						<a href="#"><i class="ic-search"></i></a>
+						<input type="text" name="search" id="search">	
+					</div>
+				</form>
+			</div>
+			<div id="current-playing">
+				<div id="current-playing-top">
+					<p class="current-playing-now">2:39</p>
+					<h2 class="current-playing-trackname">Arctic Monkeys - Brianstorm</h2>
+					<p class="current-playing-total">4:30</p>
+				</div>
+				<div id="current-playing-bottom">
+					<div class="timeline-container">
+						<div class="current-timeline" style="width:37%"></div>
+					</div>
+				</div>
+			</div>
+		</header>
+		
+		<div id="middle">
+			<div id="left-bar">
+				
+				<div id="left-top">
+					
+					<ul>
+						<li class="header">Another header</li>
+						<li><a href="">Now Playing</a></li>
+						<li class="current"><a href="">Now Playing</a></li>
+						<li><a href="">Now Playing</a></li>
+					</ul>
+					<ul>
+						<li class="header">Header</li>
+						<li><a href="">Now Playing</a></li>
+						<li><a href="">Now Playing</a></li>
+					</ul>
+					<ul>
+						<li><a href="">Now Playing</a></li>
+						<li><a href="">Now Playing</a></li>
+						<li><a href="">Now Playing</a></li>
+					</ul>
+					
+				</div>
+				
+				<div id="left-bar-bottom">
+					
+					<h3>Now Playing</h3>
+					<div class="current-playing-art">
+
+						<img src="http://flickholdr.com/400/400/3" alt="Album Art" />
+
+					</div>
+					<div id="left-bar-bottom-tools"></div>
+					
+				</div>
+			</div>
+			
+			<div id="pane-container" data-active-pane="login">
+				<div class="pane" data-pane="login">
+					<div class="pane-space">
+						
+						<form class="login">
+							
+							<h2>Login to access iMuTV</h2>
+							<div class="input">
+								<input name="login[username]" id="username" type="text" placeholder="Username">
+							</div>
+							<div class="input">
+								<input name="login[password]" type="password" placeholder="Password">
+							</div>
+							<div class="input">
+								<input class="btn" name="login[submit]" type="submit" value="Login">
+							</div>
+							
+						</form>
+						
+					</div>
+				</div>
+				<div class="pane" data-pane="home">
+					
+					<div class="pane-toolbar-top">
+						
+						<a href="#" class="selected">Albums</a>
+						<a href="#">Artists</a>
+						<a href="#">Genres</a>
+						
+					</div>
+					<div class="pane-space">
+						
+						<h2>Your library</h2>
+						
+						<div class="pane-content">
+							
+							
+							
+						</div>
+						
+					</div>
+					
+				</div>
+			</div>
+			<div id="pane-toolbar-bottom">
+				<div class="pane-toolbar-bottom" data-pane="general">This is the general bottom toolbar space</div>
+			</div>
+			
+		</div>
+		
+	</div>
+
+	<!--<script type="text/javascript" src="imutv.js"></script>-->
+
+</body>
+</html>

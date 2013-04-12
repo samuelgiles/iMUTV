@@ -1,0 +1,114 @@
+@import url("normalize.less");
+@import url("font-awesome.less");
+
+body{
+	font-family: "Open-Sans", Helvetica, "Helvetica-Neue", Arial, sans-serif;
+	color: #424652;
+	font-size: 14px;
+}
+h1,h2,h3,h4,h5,h6{
+	font-weight:600;
+}
+h1{
+	font-size: 22px;
+}
+h2{
+	font-size: 19px;
+}
+h3{
+	font-size: 16px;
+}
+h4{
+	font-size: 13px;
+}
+h5{
+	font-size: 11px;
+}
+h6{
+	font-size: 10px;
+}
+.ir{
+	border: 0;
+	font: 0/0 a;
+	text-shadow: none;
+	color: transparent;
+}
+*{
+	box-sizing: border-box;
+}
+.gradient(@colour1, @colour2){
+	background: @colour1;
+	background: -moz-linear-gradient(top,  @colour1 0%, @colour2 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,@colour1), color-stop(100%,@colour2));
+	background: -webkit-linear-gradient(top,  @colour1 0%,@colour2 100%);
+	background: -o-linear-gradient(top,  @colour1 0%,@colour2 100%);
+	background: -ms-linear-gradient(top,  @colour1 0%,@colour2 100%);
+	background: linear-gradient(to bottom,  @colour1 0%,@colour2 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='@colour1', endColorstr='@colour2',GradientType=0 );
+}
+
+header{
+	.gradient(#d3d3d3, darken(#d3d3d3,10%));
+	-webkit-box-shadow: inset 0px 2px 2px rgba(255,255,255,0.4);
+	#header-top{
+		height:53px;
+	}
+	#current-playing{
+		-webkit-box-shadow: inset 0px 2px 3px rgba(0,0,0,0.4);
+		.gradient(#414141, darken(#414141,5%));
+		height: 40px;
+		border-top: 1px solid darken(#d3d3d3,15%);
+	}
+}
+#middle{
+	#left-bar{
+		.gradient(#d9e0f0, darken(#d9e0f0,5%));
+		border-right: 1px solid #a5b1cb;
+		width:20%;
+		ul{
+			padding:0px;
+			margin:0px;
+			list-style:none;
+			li{
+				padding:0px;
+				margin:0px;
+			}
+		}
+		ul{
+			li{
+				padding-top: 5px;
+				padding-left: 15px;
+				padding-right: 15px;
+				padding-bottom: 5px;
+				a{
+					color: #505664;
+					text-shadow: 0px 1px 1px rgba(255,255,255,0.8);
+				}
+			}
+			li.header{
+				color: #838b9e;
+				text-shadow: 0px 1px 1px rgba(255,255,255,0.8);
+				text-transform: uppercase;
+				font-size: 12px;
+			}
+			li.current{
+				.gradient(#468cfe, #4184ef);
+				a{
+					color: #fff;
+					text-shadow: 0px 1px 2px rgba(0,0,0,0.7);
+				}
+			}
+		}
+	}
+	h3{
+		.gradient(#b7bfd6, #c6cee1);
+		text-align:center;
+		text-transform: uppercase;
+		font-size: 13px;
+		border-top: 1px solid #a4b0c8;
+		padding-top:6px;
+		color: #515765;
+		padding-bottom:6px;
+		text-shadow: 0px 1px 1px rgba(255,255,255,0.8);
+	}
+}

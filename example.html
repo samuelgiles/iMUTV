@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+
+	<script type="text/javascript">
+
+	var events = [];
+
+	$(document).ready(function(){
+
+		$("#event").submit(function(){
+
+			var title = $("#title").val();
+			var date = $("#date").val();
+
+			events.push({"title": title, "date": date});
+
+			return false;
+		});
+
+	});
+
+	</script>
+</head>
+<body>
+	<form id="event">
+		<div><input type="text" name="title" id="title"></div>
+		<div><input type="text" name="date" id="date"></div>
+		<input type="submit" value="Send" />
+	</form>
+</body>
+</html>
